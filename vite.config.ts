@@ -37,7 +37,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          ui: ['./src/ui.ts']
+          game: ['./src/simple-game.ts']
         }
       }
     }
