@@ -23,6 +23,10 @@ export class WorkingFlappyDog {
     private dog: Dog = { y: 150, velocity: 0 };
     private obstacles: Obstacle[] = [];
     private animationId: number | null = null;
+    
+    // Pixel dog sprite
+    private pixelDogImage: HTMLImageElement | null = null;
+    private dogImageLoaded: boolean = false;
 
     // Game constants (exactly like reference)
     private readonly CANVAS_WIDTH = 800;
@@ -90,16 +94,17 @@ export class WorkingFlappyDog {
                     align-items: center;
                     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
                 ">
-                    <h3 style="margin: 0; font-size: 18px; color: #2c3e50;">🐕 FlappyDog</h3>
+                    <h3 style="margin: 0; font-size: 18px; color: #2c3e50; font-weight: bold;">FlappyDog</h3>
                     <button id="resetBtn" style="
                         padding: 8px 16px;
-                        background: #f39c12;
+                        background: #e74c3c;
                         color: white;
                         border: none;
                         border-radius: 4px;
                         cursor: pointer;
                         font-size: 14px;
-                    ">🔄 Reset</button>
+                        font-weight: bold;
+                    ">Reset</button>
                 </div>
                 
                 <!-- Game Canvas Container -->
@@ -145,10 +150,26 @@ export class WorkingFlappyDog {
             this.resetGame();
         });
         
-        // Start game loop immediately (no asset loading needed)
+        // Load the pixel dog sprite
+        this.loadPixelDog();
+        
+        // Start game loop immediately
         this.gameLoop();
         
         console.log('Working FlappyDog initialized successfully!');
+    }
+
+    private loadPixelDog(): void {
+        this.pixelDogImage = new Image();
+        this.pixelDogImage.onload = () => {
+            this.dogImageLoaded = true;
+            console.log('Pixel dog sprite loaded!');
+        };
+        this.pixelDogImage.onerror = () => {
+            console.warn('Pixel dog sprite failed to load, using fallback');
+            this.dogImageLoaded = false;
+        };
+        this.pixelDogImage.src = '/pixeldog.png';
     }
 
     private handleInput(): void {
@@ -366,33 +387,48 @@ export class WorkingFlappyDog {
     }
 
     private drawDog(x: number, y: number): void {
-        // Draw dog exactly like reference bird but as a dog
-        this.ctx.fillStyle = '#D2B48C'; // Tan color for dog
-        this.ctx.fillRect(x, y, this.DOG_SIZE, this.DOG_SIZE);
-        
-        // Dog head
-        this.ctx.fillStyle = '#DDB892';
-        this.ctx.fillRect(x + 5, y - 8, 20, 20);
-        
-        // Eye
-        this.ctx.fillStyle = '#ffffff';
-        this.ctx.fillRect(x + 15, y - 3, 6, 6);
-        this.ctx.fillStyle = '#000000';
-        this.ctx.fillRect(x + 17, y - 1, 2, 2);
-        
-        // Nose
-        this.ctx.fillStyle = '#000000';
-        this.ctx.fillRect(x + 22, y + 3, 2, 2);
-        
-        // Ears
-        this.ctx.fillStyle = '#CD853F';
-        this.ctx.fillRect(x + 8, y - 12, 4, 8);
-        this.ctx.fillRect(x + 18, y - 12, 4, 8);
-        
-        // Tail (wagging effect)
-        const tailOffset = Math.sin(Date.now() * 0.01) * 2;
-        this.ctx.fillStyle = '#D2B48C';
-        this.ctx.fillRect(x - 8 + tailOffset, y + 8, 8, 4);
+        if (this.dogImageLoaded && this.pixelDogImage) {
+            // Use the actual pixel dog sprite
+            const dogWidth = this.DOG_SIZE + 10;
+            const dogHeight = this.DOG_SIZE + 10;
+            
+            // Add subtle rotation based on velocity for playing state
+            if (this.gameState === 'playing') {
+                this.ctx.save();
+                this.ctx.translate(x + dogWidth/2, y + dogHeight/2);
+                const rotation = Math.max(-0.3, Math.min(0.3, this.dog.velocity * 0.03));
+                this.ctx.rotate(rotation);
+                this.ctx.drawImage(this.pixelDogImage, -dogWidth/2, -dogHeight/2, dogWidth, dogHeight);
+                this.ctx.restore();
+            } else {
+                // Static dog for menu with slight bounce
+                const bounceOffset = this.gameState === 'menu' ? Math.sin(Date.now() * 0.003) * 2 : 0;
+                this.ctx.drawImage(this.pixelDogImage, x, y + bounceOffset, dogWidth, dogHeight);
+            }
+        } else {
+            // Fallback: simple pixel dog
+            this.ctx.fillStyle = '#D2B48C';
+            this.ctx.fillRect(x, y, this.DOG_SIZE, this.DOG_SIZE);
+            
+            // Dog head
+            this.ctx.fillStyle = '#DDB892';
+            this.ctx.fillRect(x + 5, y - 8, 20, 20);
+            
+            // Eye
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.fillRect(x + 15, y - 3, 6, 6);
+            this.ctx.fillStyle = '#000000';
+            this.ctx.fillRect(x + 17, y - 1, 2, 2);
+            
+            // Nose
+            this.ctx.fillStyle = '#000000';
+            this.ctx.fillRect(x + 22, y + 3, 2, 2);
+            
+            // Ears
+            this.ctx.fillStyle = '#CD853F';
+            this.ctx.fillRect(x + 8, y - 12, 4, 8);
+            this.ctx.fillRect(x + 18, y - 12, 4, 8);
+        }
     }
 
     private drawObstacle(obstacle: Obstacle): void {
