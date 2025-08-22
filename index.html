@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>FlappyDog - The Ultimate Flappy Game</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="FlappyDog - A next-level Flappy-style web game with rhythm gameplay, adaptive difficulty, and cozy polish. Play offline as a PWA!" />
+    <meta name="keywords" content="flappy bird, game, pwa, rhythm, mobile game, web game, offline" />
+    <meta name="author" content="FlappyDog Team" />
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="FlappyDog - The Ultimate Flappy Game" />
+    <meta property="og:description" content="Experience the next evolution of Flappy games with rhythm mode, adaptive difficulty, and cozy polish!" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://flappydog.vercel.app" />
+    <meta property="og:image" content="https://flappydog.vercel.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="FlappyDog - The Ultimate Flappy Game" />
+    <meta name="twitter:description" content="Experience the next evolution of Flappy games!" />
+    <meta name="twitter:image" content="https://flappydog.vercel.app/og-image.png" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#87CEEB" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="FlappyDog" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    
+    <!-- Preload critical assets -->
+    <link rel="preload" href="/assets/dog.png" as="image" />
+    <link rel="preload" href="/assets/ui_sfx/flap.mp3" as="audio" />
+    
+    <style>
+        /* Critical CSS for loading screen */
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #87CEEB, #4682B4);
+            font-family: monospace;
+        }
+        
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            font-size: 24px;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading">
+        <div class="loading-spinner"></div>
+        <div>Loading FlappyDog...</div>
+    </div>
+    
+    <!-- Game Canvas -->
+    <canvas id="gameCanvas" class="hidden"></canvas>
+    
+    <!-- UI Overlay -->
+    <div id="uiOverlay" class="hidden"></div>
+    
+    <!-- Audio Context (for mobile unlock) -->
+    <audio id="audioContext" preload="none"></audio>
+    
+    <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
