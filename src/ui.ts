@@ -68,9 +68,24 @@ export class UIManager {
     }> = [];
     
     constructor() {
-        this.overlay = document.getElementById('uiOverlay')!;
+        // Get the UI overlay element
+        const overlayElement = document.getElementById('uiOverlay');
+        if (!overlayElement) {
+            console.error('uiOverlay element not found!');
+            // Create it if it doesn't exist
+            const newOverlay = document.createElement('div');
+            newOverlay.id = 'uiOverlay';
+            newOverlay.className = 'ui-overlay';
+            document.body.appendChild(newOverlay);
+            this.overlay = newOverlay;
+        } else {
+            this.overlay = overlayElement;
+        }
+        
         this.setupEventListeners();
         this.loadSettings();
+        
+        console.log('UIManager initialized with overlay:', this.overlay);
     }
     
     public initialize(canvas: HTMLCanvasElement, gameInstance?: any): void {
@@ -154,10 +169,33 @@ export class UIManager {
     }
     
     public showMenu(): void {
+        console.log('showMenu called');
+        console.log('overlay element:', this.overlay);
+        
         this.currentMenu = 'main';
-        this.overlay.innerHTML = this.createMainMenuHTML();
-        this.bindMainMenuEvents();
-        this.overlay.classList.remove('hidden');
+        
+        try {
+            const menuHTML = this.createMainMenuHTML();
+            console.log('Created menu HTML, length:', menuHTML.length);
+            
+            this.overlay.innerHTML = menuHTML;
+            console.log('Set overlay innerHTML');
+            
+            this.bindMainMenuEvents();
+            console.log('Bound menu events');
+            
+            this.overlay.classList.remove('hidden');
+            console.log('Removed hidden class from overlay');
+            
+            // Force display
+            this.overlay.style.display = 'block';
+            this.overlay.style.visibility = 'visible';
+            this.overlay.style.opacity = '1';
+            console.log('Applied inline styles to ensure visibility');
+            
+        } catch (error) {
+            console.error('Error in showMenu:', error);
+        }
     }
     
     private createMainMenu(): void {
