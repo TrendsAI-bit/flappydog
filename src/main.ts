@@ -7,6 +7,8 @@ import './styles.css';
 import { AudioManager } from './audio';
 import { UIManager } from './ui';
 import { LeaderboardManager } from './leaderboard';
+import { SPRITES } from './assets';
+import { updateFavicon, generateOGImage } from './generate-assets';
 
 // Game constants
 const GAME_WIDTH = 800;
@@ -189,6 +191,12 @@ class GameEngine {
         // Initialize quests
         this.initializeQuests();
         
+        // Update favicon with generated icon
+        updateFavicon();
+        
+        // Generate and set OG image
+        this.generateSocialImage();
+        
         // Start loading assets
         this.loadAssets();
     }
@@ -349,6 +357,11 @@ class GameEngine {
         // Add super wag meter
         this.superWagMeter = Math.min(100, this.superWagMeter + 10);
         
+        // Trigger bark pulse if meter is full and spacebar held
+        if (this.superWagMeter >= 100 && this.keys.has('Space')) {
+            this._barkPulse();
+        }
+        
         // Screen shake
         if (this.settings.screenShake && !this.settings.motionReduced) {
             this.addScreenShake(2);
@@ -489,10 +502,16 @@ class GameEngine {
         this.audioManager.stopMusic();
         this.audioManager.playSound('gameover');
         
+        // Screen reader announcement
+        this.announceToScreenReader(`Game Over! Final score: ${this.score}`);
+        
         // Update best score
         if (this.score > this.bestScore) {
             this.bestScore = this.score;
             this.saveSettings();
+            
+            // Announce new record
+            this.announceToScreenReader(`New personal best! Score: ${this.score}`);
             
             // Confetti for new record
             this.addParticles({ x: GAME_WIDTH / 2, y: GAME_HEIGHT / 2 }, 'rainbow', 20);
@@ -515,6 +534,20 @@ class GameEngine {
         
         // Update quests
         this.updateQuests();
+    }
+    
+    private announceToScreenReader(message: string): void {
+        const srElement = document.getElementById('sr-instructions');
+        if (srElement) {
+            srElement.textContent = message;
+            
+            // Clear after a delay to allow for new announcements
+            setTimeout(() => {
+                if (srElement.textContent === message) {
+                    srElement.textContent = '';
+                }
+            }, 3000);
+        }
     }
     
     private updateDifficultyMultiplier(): void {
@@ -662,6 +695,9 @@ class GameEngine {
                 duration: 2000 + Math.random() * 3000,
                 elapsed: 0
             };
+            
+            // Add wind particles when new gust starts
+            this.addWindParticles();
         }
         
         if (this.wind) {
@@ -671,6 +707,27 @@ class GameEngine {
             const progress = this.wind.elapsed / this.wind.duration;
             const easing = Math.sin(progress * Math.PI);
             this.wind.strength = WIND_STRENGTH * easing * this.difficultyMultiplier;
+        }
+    }
+    
+    private addWindParticles(): void {
+        if (!this.wind) return;
+        
+        for (let i = 0; i < 10; i++) {
+            const x = Math.random() * GAME_WIDTH;
+            const y = Math.random() * GAME_HEIGHT;
+            
+            this.particles.push({
+                position: { x, y },
+                velocity: {
+                    x: this.wind.direction.x * 100,
+                    y: this.wind.direction.y * 50
+                },
+                life: 1000 + Math.random() * 500,
+                maxLife: 1500,
+                color: 'rgba(255, 255, 255, 0.3)',
+                size: 1 + Math.random() * 2
+            });
         }
     }
     
@@ -908,28 +965,64 @@ class GameEngine {
     private drawObstacle(obstacle: Obstacle): void {
         this.ctx.save();
         
-        // Draw soft-edged cloud gates
-        this.ctx.fillStyle = this.settings.colorblind ? '#FF6B6B' : '#90EE90';
-        this.ctx.strokeStyle = '#228B22';
-        this.ctx.lineWidth = 3;
+        const obstacleSprite = this.sprites.get('obstacle');
         
-        // Top part
-        this.drawRoundedRect(
-            obstacle.position.x,
-            0,
-            obstacle.width,
-            obstacle.gapY,
-            10
-        );
+        if (obstacleSprite) {
+            // Draw sprite-based obstacles
+            // Top part
+            this.ctx.drawImage(
+                obstacleSprite,
+                obstacle.position.x,
+                0,
+                obstacle.width,
+                obstacle.gapY
+            );
+            
+            // Bottom part
+            this.ctx.drawImage(
+                obstacleSprite,
+                0, obstacle.gapY + obstacle.gapSize, // Source Y from sprite
+                obstacle.width, GAME_HEIGHT - (obstacle.gapY + obstacle.gapSize), // Source dimensions
+                obstacle.position.x,
+                obstacle.gapY + obstacle.gapSize,
+                obstacle.width,
+                GAME_HEIGHT - (obstacle.gapY + obstacle.gapSize)
+            );
+        } else {
+            // Fallback to procedural drawing
+            this.ctx.fillStyle = this.settings.colorblind ? '#FF6B6B' : '#90EE90';
+            this.ctx.strokeStyle = '#228B22';
+            this.ctx.lineWidth = 3;
+            
+            // Top part
+            this.drawRoundedRect(
+                obstacle.position.x,
+                0,
+                obstacle.width,
+                obstacle.gapY,
+                10
+            );
+            
+            // Bottom part
+            this.drawRoundedRect(
+                obstacle.position.x,
+                obstacle.gapY + obstacle.gapSize,
+                obstacle.width,
+                GAME_HEIGHT - (obstacle.gapY + obstacle.gapSize),
+                10
+            );
+        }
         
-        // Bottom part
-        this.drawRoundedRect(
-            obstacle.position.x,
-            obstacle.gapY + obstacle.gapSize,
-            obstacle.width,
-            GAME_HEIGHT - (obstacle.gapY + obstacle.gapSize),
-            10
-        );
+        // Add glow effect if dog is near
+        const distance = this.getDistance(this.dog.position, {
+            x: obstacle.position.x + obstacle.width / 2,
+            y: obstacle.gapY + obstacle.gapSize / 2
+        });
+        
+        if (distance < 150) {
+            this.ctx.shadowColor = this.dog.superWagActive ? '#FFD700' : '#87CEEB';
+            this.ctx.shadowBlur = 10;
+        }
         
         this.ctx.restore();
     }
@@ -945,18 +1038,54 @@ class GameEngine {
         
         this.ctx.translate(x, y + floatOffset);
         
-        if (collectible.type === 'bone') {
-            this.ctx.fillStyle = '#FFF8DC';
-            this.ctx.strokeStyle = '#DDD';
-            this.drawBone();
-        } else if (collectible.type === 'coin') {
-            const isValuable = collectible.value > 1;
-            this.ctx.fillStyle = isValuable ? '#FFD700' : '#FFA500';
-            this.ctx.strokeStyle = isValuable ? '#B8860B' : '#FF8C00';
-            this.drawCoin(isValuable);
+        // Add rotation for coins
+        if (collectible.type === 'coin') {
+            const rotation = Date.now() * 0.003;
+            this.ctx.rotate(rotation);
+        }
+        
+        // Use generated sprites if available
+        const spriteKey = collectible.type === 'bone' ? 'bone' : 'coin';
+        const sprite = this.sprites.get(spriteKey);
+        
+        if (sprite) {
+            this.ctx.drawImage(
+                sprite,
+                -collectible.width / 2,
+                -collectible.height / 2,
+                collectible.width,
+                collectible.height
+            );
+            
+            // Add sparkle effect for valuable coins
+            if (collectible.type === 'coin' && collectible.value > 1) {
+                this.addSparkleEffect();
+            }
+        } else {
+            // Fallback to procedural drawing
+            if (collectible.type === 'bone') {
+                this.ctx.fillStyle = '#FFF8DC';
+                this.ctx.strokeStyle = '#DDD';
+                this.drawBone();
+            } else if (collectible.type === 'coin') {
+                const isValuable = collectible.value > 1;
+                this.ctx.fillStyle = isValuable ? '#FFD700' : '#FFA500';
+                this.ctx.strokeStyle = isValuable ? '#B8860B' : '#FF8C00';
+                this.drawCoin(isValuable);
+            }
         }
         
         this.ctx.restore();
+    }
+    
+    private addSparkleEffect(): void {
+        this.ctx.fillStyle = '#FFFFFF';
+        for (let i = 0; i < 4; i++) {
+            const angle = (i / 4) * Math.PI * 2 + Date.now() * 0.01;
+            const x = Math.cos(angle) * 15;
+            const y = Math.sin(angle) * 15;
+            this.ctx.fillRect(x - 1, y - 1, 2, 2);
+        }
     }
     
     private drawBone(): void {
@@ -1340,24 +1469,64 @@ class GameEngine {
     
     private updateQuests(): void {
         // Update quest progress based on game events
-        // This would be expanded with specific quest tracking
+        this._activeQuests.forEach(quest => {
+            if (quest.completed) return;
+            
+            switch (quest.id) {
+                case 'flap_master':
+                    // Track gates passed without gliding
+                    if (this.score >= quest.progress + 1 && !this.isGliding()) {
+                        quest.progress = Math.min(quest.target, quest.progress + 1);
+                    }
+                    break;
+                    
+                case 'coin_collector':
+                    // Track coins collected in current run
+                    const coinsCollected = this.collectibles.filter(c => c.collected && c.type === 'coin').length;
+                    quest.progress = Math.min(quest.target, coinsCollected);
+                    break;
+                    
+                case 'rhythm_master':
+                    // Track perfect beats in rhythm mode
+                    if (this.gameMode === 'rhythm') {
+                        quest.progress = Math.min(quest.target, this.perfectBeatStreak);
+                    }
+                    break;
+            }
+            
+            // Check if quest is completed
+            if (quest.progress >= quest.target && !quest.completed) {
+                quest.completed = true;
+                this.completeQuest(quest);
+            }
+        });
+    }
+    
+    private completeQuest(quest: Quest): void {
+        // Show completion notification
+        this.uiManager.showToast(`🎉 Quest Complete: ${quest.reward}!`, 'success', 5000);
+        
+        // Unlock cosmetic reward
+        this.uiManager.unlockCosmetic(quest.reward.toLowerCase().replace(' ', '_'));
+        
+        // Play completion sound
+        this.audioManager.playSound('quest_complete');
+        
+        // Add celebration particles
+        this.addParticles({ x: GAME_WIDTH / 2, y: GAME_HEIGHT / 2 }, 'rainbow', 20);
+        
+        // Save progress
+        this.saveSettings();
     }
     
     private loadAssets(): void {
-        const assetList = [
-            'dog.png',
-            'obstacles.png',
-            'bones.png',
-            'coins.png',
-            'clouds.png'
-        ];
-        
+        const assetList = Object.keys(SPRITES);
         this.totalSprites = assetList.length;
         
         assetList.forEach(assetName => {
             const img = new Image();
             img.onload = () => {
-                this.sprites.set(assetName.split('.')[0], img);
+                this.sprites.set(assetName, img);
                 this.spritesLoaded++;
                 
                 if (this.spritesLoaded === this.totalSprites) {
@@ -1366,7 +1535,7 @@ class GameEngine {
             };
             
             img.onerror = () => {
-                console.warn(`Failed to load asset: ${assetName}`);
+                console.warn(`Failed to load generated asset: ${assetName}`);
                 this.spritesLoaded++;
                 
                 if (this.spritesLoaded === this.totalSprites) {
@@ -1374,7 +1543,8 @@ class GameEngine {
                 }
             };
             
-            img.src = `/assets/${assetName}`;
+            // Use generated sprites
+            img.src = SPRITES[assetName as keyof typeof SPRITES];
         });
     }
     
@@ -1406,6 +1576,33 @@ class GameEngine {
     private saveSettings(): void {
         localStorage.setItem('flappydog-settings', JSON.stringify(this.settings));
         localStorage.setItem('flappydog-bestscore', this.bestScore.toString());
+    }
+    
+    private generateSocialImage(): void {
+        // Generate OG image for social sharing
+        const ogImageUrl = generateOGImage();
+        
+        // Update OG meta tag
+        let ogImage = document.querySelector('meta[property="og:image"]') as HTMLMetaElement;
+        if (ogImage) {
+            ogImage.content = ogImageUrl;
+        } else {
+            ogImage = document.createElement('meta');
+            ogImage.setAttribute('property', 'og:image');
+            ogImage.content = ogImageUrl;
+            document.head.appendChild(ogImage);
+        }
+        
+        // Update Twitter card
+        let twitterImage = document.querySelector('meta[name="twitter:image"]') as HTMLMetaElement;
+        if (twitterImage) {
+            twitterImage.content = ogImageUrl;
+        } else {
+            twitterImage = document.createElement('meta');
+            twitterImage.setAttribute('name', 'twitter:image');
+            twitterImage.content = ogImageUrl;
+            document.head.appendChild(twitterImage);
+        }
     }
     
     private gameLoop = (currentTime: number = 0): void => {

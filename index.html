@@ -35,6 +35,10 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     
+    <!-- Accessibility -->
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://flappydog.vercel.app" />
+    
     <!-- Preload critical assets -->
     <link rel="preload" href="/assets/dog.png" as="image" />
     <link rel="preload" href="/assets/ui_sfx/flap.mp3" as="audio" />
@@ -86,13 +90,22 @@
     </div>
     
     <!-- Game Canvas -->
-    <canvas id="gameCanvas" class="hidden"></canvas>
+    <canvas id="gameCanvas" class="hidden" 
+            role="application" 
+            aria-label="FlappyDog Game Canvas"
+            tabindex="0"></canvas>
     
     <!-- UI Overlay -->
-    <div id="uiOverlay" class="hidden"></div>
+    <div id="uiOverlay" class="hidden" role="dialog" aria-live="polite"></div>
     
     <!-- Audio Context (for mobile unlock) -->
-    <audio id="audioContext" preload="none"></audio>
+    <audio id="audioContext" preload="none" aria-hidden="true"></audio>
+    
+    <!-- Screen Reader Instructions -->
+    <div id="sr-instructions" class="sr-only" aria-live="polite">
+        FlappyDog is loading. Use spacebar, click, or tap to flap. 
+        Press escape to pause. Navigate menus with tab and enter.
+    </div>
     
     <script type="module" src="/src/main.ts"></script>
 </body>

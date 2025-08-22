@@ -122,6 +122,35 @@ export class UIManager {
             e.preventDefault();
             this.showLeaderboard();
         }
+        
+        // Arrow key navigation
+        if (e.code === 'ArrowDown' || e.code === 'ArrowUp') {
+            this.handleArrowKeyNavigation(e.code === 'ArrowDown' ? 1 : -1);
+        }
+        
+        // Enter key activation
+        if (e.code === 'Enter' || e.code === 'Space') {
+            const activeElement = document.activeElement as HTMLElement;
+            if (activeElement && activeElement.tagName === 'BUTTON') {
+                activeElement.click();
+            }
+        }
+    }
+    
+    private handleArrowKeyNavigation(direction: number): void {
+        const focusableElements = this.overlay.querySelectorAll(
+            'button:not(:disabled), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        ) as NodeListOf<HTMLElement>;
+        
+        if (focusableElements.length === 0) return;
+        
+        const currentIndex = Array.from(focusableElements).indexOf(document.activeElement as HTMLElement);
+        let nextIndex = currentIndex + direction;
+        
+        if (nextIndex < 0) nextIndex = focusableElements.length - 1;
+        if (nextIndex >= focusableElements.length) nextIndex = 0;
+        
+        focusableElements[nextIndex].focus();
     }
     
     public showMenu(): void {
@@ -150,19 +179,24 @@ export class UIManager {
                     </div>
                     
                     <!-- Main Buttons -->
-                    <div class="button-group">
-                        <button id="start-classic" class="menu-btn primary-btn animate-float">
-                            <span class="btn-icon">🎮</span>
+                    <div class="button-group" role="group" aria-label="Game Mode Selection">
+                        <button id="start-classic" class="menu-btn primary-btn animate-float" 
+                                aria-label="Start Classic Mode - Traditional Flappy gameplay">
+                            <span class="btn-icon" aria-hidden="true">🎮</span>
                             <span class="btn-text">Classic Mode</span>
                         </button>
                         
-                        <button id="start-rhythm" class="menu-btn secondary-btn animate-float" style="animation-delay: 0.1s">
-                            <span class="btn-icon">🎵</span>
+                        <button id="start-rhythm" class="menu-btn secondary-btn animate-float" 
+                                style="animation-delay: 0.1s"
+                                aria-label="Start Rhythm Mode - Obstacles sync to music beats">
+                            <span class="btn-icon" aria-hidden="true">🎵</span>
                             <span class="btn-text">Rhythm Mode</span>
                         </button>
                         
-                        <button id="start-checkpoint" class="menu-btn secondary-btn animate-float" style="animation-delay: 0.2s">
-                            <span class="btn-icon">🏁</span>
+                        <button id="start-checkpoint" class="menu-btn secondary-btn animate-float" 
+                                style="animation-delay: 0.2s"
+                                aria-label="Start Checkpoint Mode - Save progress every 30 points">
+                            <span class="btn-icon" aria-hidden="true">🏁</span>
                             <span class="btn-text">Checkpoint Mode</span>
                         </button>
                     </div>
