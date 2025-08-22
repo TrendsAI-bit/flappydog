@@ -208,6 +208,83 @@ export class WorkingFlappyDog {
                         letter-spacing: 1px;
                     ">CURRENT: ${this.score} • BEST: ${this.highScore} • NAVIGATE THROUGH THE OBSTACLES!</div>
                 </div>
+                
+                <!-- 🏆 CHALLENGE BANNER 🏆 -->
+                <div style="
+                    border: 4px solid #f39c12;
+                    background: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%);
+                    padding: 20px;
+                    margin-top: 20px;
+                    width: 800px;
+                    text-align: center;
+                    box-shadow: 
+                        inset 2px 2px 0px rgba(255,255,255,0.4),
+                        inset -2px -2px 0px rgba(0,0,0,0.2),
+                        4px 4px 0px #e67e22;
+                    image-rendering: pixelated;
+                    font-family: 'Courier New', monospace;
+                    animation: glow 2s ease-in-out infinite alternate;
+                ">
+                    <div style="
+                        font-size: 18px;
+                        font-weight: bold;
+                        color: #2c3e50;
+                        text-shadow: 2px 2px 0px rgba(255,255,255,0.7);
+                        letter-spacing: 2px;
+                        margin-bottom: 15px;
+                    ">🏆 CHALLENGE: FIRST TO GET TO 100 GETS 100 SOL! 🏆</div>
+                    
+                    <div style="
+                        background: rgba(44, 62, 80, 0.9);
+                        border: 2px solid #2c3e50;
+                        border-radius: 4px;
+                        padding: 12px;
+                        margin: 10px auto;
+                        max-width: 700px;
+                        box-shadow: inset 1px 1px 0px rgba(255,255,255,0.1);
+                    ">
+                        <div style="
+                            font-size: 14px;
+                            color: #f39c12;
+                            font-weight: bold;
+                            margin-bottom: 8px;
+                            letter-spacing: 1px;
+                        ">🪙 TOKEN ADDRESS:</div>
+                        <div style="
+                            font-size: 16px;
+                            color: #ffffff;
+                            font-weight: bold;
+                            word-break: break-all;
+                            line-height: 1.4;
+                            text-shadow: 1px 1px 0px rgba(0,0,0,0.8);
+                            letter-spacing: 1px;
+                        ">2sdmMFgmV2oue7Wri4Ums3FJm6T4ASWJTu2uMh3Rpump</div>
+                    </div>
+                    
+                    <div style="
+                        font-size: 14px;
+                        color: #2c3e50;
+                        font-weight: bold;
+                        text-shadow: 1px 1px 0px rgba(255,255,255,0.7);
+                        letter-spacing: 1px;
+                        margin-top: 10px;
+                    ">🎮 REACH SCORE 100 TO WIN 100 SOL! 🎮</div>
+                </div>
+                
+                <style>
+                    @keyframes glow {
+                        from { box-shadow: 
+                            inset 2px 2px 0px rgba(255,255,255,0.4),
+                            inset -2px -2px 0px rgba(0,0,0,0.2),
+                            4px 4px 0px #e67e22,
+                            0 0 20px rgba(243, 156, 18, 0.5); }
+                        to { box-shadow: 
+                            inset 2px 2px 0px rgba(255,255,255,0.4),
+                            inset -2px -2px 0px rgba(0,0,0,0.2),
+                            4px 4px 0px #e67e22,
+                            0 0 30px rgba(243, 156, 18, 0.8); }
+                    }
+                </style>
             </div>
         `;
         
@@ -366,6 +443,32 @@ export class WorkingFlappyDog {
         console.log('Sound', this.soundEnabled ? 'enabled' : 'disabled');
     }
 
+    private celebrate100Score(): void {
+        // 🏆 WINNER! REACHED 100 SCORE! 🏆
+        console.log('🏆 CONGRATULATIONS! SCORE 100 REACHED! 🏆');
+        
+        // Play special victory sound sequence
+        setTimeout(() => this.playSound('score'), 0);
+        setTimeout(() => this.playSound('score'), 200);
+        setTimeout(() => this.playSound('score'), 400);
+        setTimeout(() => this.playSound('score'), 600);
+        
+        // Show special winner alert
+        setTimeout(() => {
+            alert(`🏆 CONGRATULATIONS! 🏆
+
+You reached score 100!
+
+FIRST TO GET TO 100 GETS 100 SOL!
+
+Token Address: 2sdmMFgmV2oue7Wri4Ums3FJm6T4ASWJTu2uMh3Rpump
+
+🎉 You are the WINNER! 🎉
+
+Contact the game creator to claim your 100 SOL prize!`);
+        }, 800);
+    }
+
     private handleInput(): void {
         if (this.gameState === 'menu') {
             this.startGame();
@@ -438,6 +541,11 @@ export class WorkingFlappyDog {
                 this.updateScoreDisplay();
                 this.playSound('score');
                 console.log('Score:', this.score);
+                
+                // 🏆 SPECIAL CELEBRATION FOR REACHING 100! 🏆
+                if (this.score === 100) {
+                    this.celebrate100Score();
+                }
             }
         });
 
