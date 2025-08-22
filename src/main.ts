@@ -4,7 +4,7 @@
  */
 
 import './styles.css';
-import { AudioManager } from './audio';
+import { SimpleAudioManager } from './simple-audio';
 import { UIManager } from './ui';
 import { LeaderboardManager } from './leaderboard';
 import { SPRITES } from './assets';
@@ -124,7 +124,7 @@ class GameEngine {
     private doubleTapWindow: number = 300;
     
     // Managers
-    private audioManager: AudioManager;
+    private audioManager: SimpleAudioManager;
     private uiManager: UIManager;
     private leaderboardManager: LeaderboardManager;
     
@@ -169,7 +169,7 @@ class GameEngine {
         this.ctx = this.canvas.getContext('2d')!;
         
         // Initialize managers
-        this.audioManager = new AudioManager();
+        this.audioManager = new SimpleAudioManager();
         this.uiManager = new UIManager();
         this.leaderboardManager = new LeaderboardManager();
         
@@ -857,27 +857,33 @@ class GameEngine {
     }
     
     private render(): void {
-        // Clear canvas
-        this.ctx.fillStyle = this.getBackgroundGradient();
+        // Clear canvas with solid color to prevent flickering
+        this.ctx.fillStyle = '#87CEEB'; // Sky blue
         this.ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
         
-        // Draw parallax background
+        // Draw simple gradient
+        const gradient = this.ctx.createLinearGradient(0, 0, 0, GAME_HEIGHT);
+        gradient.addColorStop(0, '#87CEEB');
+        gradient.addColorStop(1, '#98D8E8');
+        this.ctx.fillStyle = gradient;
+        this.ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+        
+        // Draw static background elements
         this.drawParallaxBackground();
         
-        // Draw wind particles
-        this.drawWindParticles();
-        
-        // Draw obstacles
+        // Draw game objects
         this.obstacles.forEach(obstacle => this.drawObstacle(obstacle));
         
-        // Draw collectibles
         this.collectibles.forEach(collectible => {
             if (!collectible.collected) {
                 this.drawCollectible(collectible);
             }
         });
         
-        // Draw particles
+        // Draw particles (but limit them to prevent performance issues)
+        if (this.particles.length > 50) {
+            this.particles = this.particles.slice(0, 50);
+        }
         this.particles.forEach(particle => this.drawParticle(particle));
         
         // Draw dog
@@ -885,11 +891,6 @@ class GameEngine {
         
         // Draw UI elements
         this.drawUI();
-        
-        // Draw debug info in development
-        if (process.env.NODE_ENV === 'development') {
-            this.drawDebugInfo();
-        }
     }
     
     private getBackgroundGradient(): CanvasGradient {
@@ -912,15 +913,35 @@ class GameEngine {
     private drawParallaxBackground(): void {
         if (this.settings.motionReduced) return;
         
-        // Draw clouds moving at different speeds
-        const cloudOffset = (Date.now() * 0.02) % GAME_WIDTH;
+        // Draw simple static clouds to avoid flickering
+        this.ctx.save();
+        this.ctx.globalAlpha = 0.3;
+        this.ctx.fillStyle = '#FFFFFF';
         
-        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-        for (let i = 0; i < 5; i++) {
-            const x = (i * 200 - cloudOffset) % (GAME_WIDTH + 100);
-            const y = 50 + (i * 30) % 150;
-            this.drawCloud(x, y, 60 + (i * 10));
-        }
+        // Static cloud positions
+        const clouds = [
+            { x: 100, y: 80, size: 60 },
+            { x: 300, y: 120, size: 80 },
+            { x: 500, y: 60, size: 70 },
+            { x: 650, y: 140, size: 65 },
+            { x: 200, y: 200, size: 75 }
+        ];
+        
+        clouds.forEach(cloud => {
+            this.drawSimpleCloud(cloud.x, cloud.y, cloud.size);
+        });
+        
+        this.ctx.restore();
+    }
+    
+    private drawSimpleCloud(x: number, y: number, size: number): void {
+        // Draw a simple cloud shape
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, size * 0.5, 0, Math.PI * 2);
+        this.ctx.arc(x + size * 0.3, y - size * 0.2, size * 0.4, 0, Math.PI * 2);
+        this.ctx.arc(x - size * 0.3, y - size * 0.1, size * 0.3, 0, Math.PI * 2);
+        this.ctx.arc(x + size * 0.1, y + size * 0.2, size * 0.35, 0, Math.PI * 2);
+        this.ctx.fill();
     }
     
     private drawCloud(x: number, y: number, size: number): void {
@@ -1550,7 +1571,7 @@ class GameEngine {
     
     private onAssetsLoaded(): void {
         // Initialize managers with loaded assets
-        this.audioManager.initialize();
+        // Audio manager initializes itself in constructor
         this.uiManager.initialize(this.canvas);
         this.leaderboardManager.initialize();
         

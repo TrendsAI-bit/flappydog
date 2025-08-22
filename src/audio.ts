@@ -144,37 +144,56 @@ export class AudioManager {
     }
     
     private async loadAllAudio(): Promise<void> {
-        const audioAssets = [
-            // Sound effects
-            { name: 'flap', path: '/assets/ui_sfx/flap.mp3', type: 'sfx', volume: 0.6 },
-            { name: 'coin', path: '/assets/ui_sfx/coin.mp3', type: 'sfx', volume: 0.7 },
-            { name: 'bone', path: '/assets/ui_sfx/bone.mp3', type: 'sfx', volume: 0.5 },
-            { name: 'checkpoint', path: '/assets/ui_sfx/checkpoint.mp3', type: 'sfx', volume: 0.8 },
-            { name: 'bark', path: '/assets/ui_sfx/bark.mp3', type: 'sfx', volume: 0.9 },
-            { name: 'dash', path: '/assets/ui_sfx/dash.mp3', type: 'sfx', volume: 0.7 },
-            { name: 'score', path: '/assets/ui_sfx/score.mp3', type: 'sfx', volume: 0.5 },
-            { name: 'gameover', path: '/assets/ui_sfx/gameover.mp3', type: 'sfx', volume: 0.8 },
-            { name: 'button', path: '/assets/ui_sfx/button.mp3', type: 'sfx', volume: 0.4 },
-            { name: 'quest_complete', path: '/assets/ui_sfx/quest_complete.mp3', type: 'sfx', volume: 0.9 },
-            
-            // Music tracks
-            { name: 'rhythm1', path: '/assets/music/rhythm1.mp3', type: 'music', bpm: 120, volume: 0.6 },
-            { name: 'rhythm2', path: '/assets/music/rhythm2.mp3', type: 'music', bpm: 90, volume: 0.6 },
-            { name: 'ambient', path: '/assets/music/ambient.mp3', type: 'music', bpm: 0, volume: 0.4 },
-            { name: 'menu', path: '/assets/music/menu.mp3', type: 'music', bpm: 0, volume: 0.3 }
-        ];
+        // Use generated sounds instead of loading MP3 files
+        this.loadGeneratedSounds();
         
-        this.totalAssets = audioAssets.length;
+        // Create simple music tracks using Web Audio API
+        this.createMusicTracks();
         
-        // Load all audio assets in parallel
-        this.loadingPromises = audioAssets.map(asset => this.loadAudioAsset(asset));
+        console.log('All audio assets loaded successfully');
+    }
+    
+    private loadGeneratedSounds(): void {
+        // Load generated sound effects
+        const soundNames = ['flap', 'coin', 'bone', 'dash', 'bark', 'score', 'gameover', 'checkpoint', 'button', 'quest_complete'];
         
-        try {
-            await Promise.all(this.loadingPromises);
-            console.log('All audio assets loaded successfully');
-        } catch (error) {
-            console.warn('Some audio assets failed to load:', error);
-        }
+        soundNames.forEach(name => {
+            this.sounds.set(name, {
+                buffer: null, // Will generate on-demand
+                volume: 0.7
+            });
+        });
+    }
+    
+    private createMusicTracks(): void {
+        // Create simple ambient music tracks
+        this.music.set('ambient', {
+            buffer: null,
+            volume: 0.3,
+            bpm: 0,
+            loop: true
+        });
+        
+        this.music.set('rhythm1', {
+            buffer: null,
+            volume: 0.4,
+            bpm: 120,
+            loop: true
+        });
+        
+        this.music.set('rhythm2', {
+            buffer: null,
+            volume: 0.4,
+            bpm: 90,
+            loop: true
+        });
+        
+        this.music.set('menu', {
+            buffer: null,
+            volume: 0.2,
+            bpm: 0,
+            loop: true
+        });
     }
     
     private async loadAudioAsset(asset: any): Promise<void> {
