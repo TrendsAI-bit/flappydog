@@ -132,6 +132,7 @@ class GameEngine {
     private sprites: Map<string, HTMLImageElement> = new Map();
     private spritesLoaded: number = 0;
     private totalSprites: number = 0;
+    private assetsLoadedCalled: boolean = false;
     
     // Settings
     private settings: GameSettings = {
@@ -1536,50 +1537,105 @@ class GameEngine {
     }
     
     private loadAssets(): void {
+        console.log('Starting asset loading...');
+        
+        // Add a timeout to ensure loading doesn't hang forever
+        setTimeout(() => {
+            console.log('Asset loading timeout - forcing completion');
+            this.onAssetsLoaded();
+        }, 3000); // 3 second timeout
+        
         const assetList = Object.keys(SPRITES);
         this.totalSprites = assetList.length;
+        
+        console.log(`Loading ${this.totalSprites} assets:`, assetList);
+        
+        // If no assets, load immediately
+        if (this.totalSprites === 0) {
+            console.log('No assets to load, proceeding immediately');
+            this.onAssetsLoaded();
+            return;
+        }
         
         assetList.forEach(assetName => {
             const img = new Image();
             img.onload = () => {
+                console.log(`Loaded asset: ${assetName}`);
                 this.sprites.set(assetName, img);
                 this.spritesLoaded++;
                 
                 if (this.spritesLoaded === this.totalSprites) {
+                    console.log('All assets loaded successfully');
                     this.onAssetsLoaded();
                 }
             };
             
-            img.onerror = () => {
-                console.warn(`Failed to load generated asset: ${assetName}`);
+            img.onerror = (error) => {
+                console.warn(`Failed to load generated asset: ${assetName}`, error);
                 this.spritesLoaded++;
                 
                 if (this.spritesLoaded === this.totalSprites) {
+                    console.log('Asset loading complete (with some failures)');
                     this.onAssetsLoaded();
                 }
             };
             
             // Use generated sprites
-            img.src = SPRITES[assetName as keyof typeof SPRITES];
+            try {
+                img.src = SPRITES[assetName as keyof typeof SPRITES];
+                console.log(`Set src for ${assetName}`);
+            } catch (error) {
+                console.error(`Error setting src for ${assetName}:`, error);
+                this.spritesLoaded++;
+                if (this.spritesLoaded === this.totalSprites) {
+                    this.onAssetsLoaded();
+                }
+            }
         });
     }
     
     private onAssetsLoaded(): void {
-        // Initialize managers with loaded assets
-        // Audio manager initializes itself in constructor
-        this.uiManager.initialize(this.canvas);
-        this.leaderboardManager.initialize();
+        if (this.assetsLoadedCalled) {
+            console.log('onAssetsLoaded already called, skipping');
+            return;
+        }
+        this.assetsLoadedCalled = true;
         
-        // Hide loading screen and show game
-        document.getElementById('loading')?.classList.add('hidden');
-        this.canvas.classList.remove('hidden');
-        document.getElementById('uiOverlay')?.classList.remove('hidden');
+        console.log('onAssetsLoaded called - initializing game');
         
-        // Show main menu
-        this.uiManager.showMenu();
-        
-        // Start game loop
-        this.gameLoop();
+        try {
+            // Initialize managers with loaded assets
+            // Audio manager initializes itself in constructor
+            this.uiManager.initialize(this.canvas);
+            this.leaderboardManager.initialize();
+            
+            // Hide loading screen and show game
+            const loading = document.getElementById('loading');
+            const overlay = document.getElementById('uiOverlay');
+            
+            if (loading) {
+                loading.classList.add('hidden');
+                console.log('Loading screen hidden');
+            }
+            
+            this.canvas.classList.remove('hidden');
+            console.log('Canvas shown');
+            
+            if (overlay) {
+                overlay.classList.remove('hidden');
+                console.log('UI overlay shown');
+            }
+            
+            // Show main menu
+            this.uiManager.showMenu();
+            console.log('Main menu shown');
+            
+            // Start game loop
+            this.gameLoop();
+            console.log('Game loop started');
+        } catch (error) {
+            console.error('Error in onAssetsLoaded:', error);
+        }
     }
     
     private loadSettings(): void {
