@@ -144,56 +144,8 @@ export class AudioManager {
     }
     
     private async loadAllAudio(): Promise<void> {
-        // Use generated sounds instead of loading MP3 files
-        this.loadGeneratedSounds();
-        
-        // Create simple music tracks using Web Audio API
-        this.createMusicTracks();
-        
-        console.log('All audio assets loaded successfully');
-    }
-    
-    private loadGeneratedSounds(): void {
-        // Load generated sound effects
-        const soundNames = ['flap', 'coin', 'bone', 'dash', 'bark', 'score', 'gameover', 'checkpoint', 'button', 'quest_complete'];
-        
-        soundNames.forEach(name => {
-            this.sounds.set(name, {
-                buffer: null, // Will generate on-demand
-                volume: 0.7
-            });
-        });
-    }
-    
-    private createMusicTracks(): void {
-        // Create simple ambient music tracks
-        this.music.set('ambient', {
-            buffer: null,
-            volume: 0.3,
-            bpm: 0,
-            loop: true
-        });
-        
-        this.music.set('rhythm1', {
-            buffer: null,
-            volume: 0.4,
-            bpm: 120,
-            loop: true
-        });
-        
-        this.music.set('rhythm2', {
-            buffer: null,
-            volume: 0.4,
-            bpm: 90,
-            loop: true
-        });
-        
-        this.music.set('menu', {
-            buffer: null,
-            volume: 0.2,
-            bpm: 0,
-            loop: true
-        });
+        // Skip loading - this AudioManager is not used anymore
+        console.log('AudioManager deprecated - using SimpleAudioManager instead');
     }
     
     private async loadAudioAsset(asset: any): Promise<void> {

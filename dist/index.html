@@ -35,6 +35,10 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     
+    <!-- Accessibility -->
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://flappydog.vercel.app" />
+    
     <!-- Preload critical assets -->
     <link rel="preload" href="data:image/png;base64," as="image" />
     <link rel="preload" href="data:audio/mpeg;base64," as="audio" />
@@ -77,10 +81,9 @@
             display: none !important;
         }
     </style>
-  <script type="module" crossorigin src="/assets/index-bffaf022.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/audio-1a7b1538.js">
-  <link rel="modulepreload" crossorigin href="/assets/ui-de6bd2fa.js">
-  <link rel="stylesheet" href="/assets/index-b8cb406f.css">
+  <script type="module" crossorigin src="/assets/index-8e66b6bd.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/ui-14cd5106.js">
+  <link rel="stylesheet" href="/assets/index-332663f3.css">
 <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
 <body>
     <!-- Loading Screen -->
@@ -90,13 +93,22 @@
     </div>
     
     <!-- Game Canvas -->
-    <canvas id="gameCanvas" class="hidden"></canvas>
+    <canvas id="gameCanvas" class="hidden" 
+            role="application" 
+            aria-label="FlappyDog Game Canvas"
+            tabindex="0"></canvas>
     
     <!-- UI Overlay -->
-    <div id="uiOverlay" class="hidden"></div>
+    <div id="uiOverlay" class="hidden" role="dialog" aria-live="polite"></div>
     
     <!-- Audio Context (for mobile unlock) -->
-    <audio id="audioContext" preload="none"></audio>
+    <audio id="audioContext" preload="none" aria-hidden="true"></audio>
+    
+    <!-- Screen Reader Instructions -->
+    <div id="sr-instructions" class="sr-only" aria-live="polite">
+        FlappyDog is loading. Use spacebar, click, or tap to flap. 
+        Press escape to pause. Navigate menus with tab and enter.
+    </div>
     
     
 </body>

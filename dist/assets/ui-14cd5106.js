@@ -1,4 +1,4 @@
-class v{constructor(){this._canvas=null,this.gameInstance=null,this.currentMenu="main",this.settings={soundVolume:.7,musicVolume:.5,haptics:!0,colorblind:!1,highContrast:!1,leftHandMode:!1,motionReduced:!1,screenShake:!0,rhythmAssist:!0},this.cosmetics=[{id:"basic_collar",name:"Basic Collar",type:"collar",unlocked:!0,equipped:!0},{id:"golden_collar",name:"Golden Collar",type:"collar",unlocked:!1,equipped:!1},{id:"sparkle_trail",name:"Sparkle Trail",type:"trail",unlocked:!1,equipped:!1},{id:"beat_wings",name:"Beat Wings",type:"hat",unlocked:!1,equipped:!1},{id:"happy_bark",name:"Happy Bark",type:"emote",unlocked:!1,equipped:!1}],this.toasts=[],this.overlay=document.getElementById("uiOverlay"),this.setupEventListeners(),this.loadSettings()}initialize(e,t){this._canvas=e,this.gameInstance=t,this.createMainMenu()}setupEventListeners(){window.addEventListener("resize",()=>{this.handleResize()}),document.addEventListener("keydown",e=>{this.handleKeyboardShortcuts(e)}),"share"in navigator&&this.setupWebShare()}handleResize(){const e=window.innerWidth<768;this.overlay.classList.toggle("mobile-layout",e),this.settings.leftHandMode&&this.overlay.classList.add("left-hand-mode")}handleKeyboardShortcuts(e){e.code==="Escape"&&this.currentMenu!=="main"&&this.showMenu(),e.code==="KeyS"&&e.ctrlKey&&(e.preventDefault(),this.showSettings()),e.code==="KeyL"&&e.ctrlKey&&(e.preventDefault(),this.showLeaderboard())}showMenu(){this.currentMenu="main",this.overlay.innerHTML=this.createMainMenuHTML(),this.bindMainMenuEvents(),this.overlay.classList.remove("hidden")}createMainMenu(){this.showMenu()}createMainMenuHTML(){const e=this.settings.leftHandMode?"left-hand-mode":"",t=this.settings.highContrast?"high-contrast":"",s=this.settings.colorblind?"colorblind-safe":"";return`
+class v{constructor(){this._canvas=null,this.gameInstance=null,this.currentMenu="main",this.settings={soundVolume:.7,musicVolume:.5,haptics:!0,colorblind:!1,highContrast:!1,leftHandMode:!1,motionReduced:!1,screenShake:!0,rhythmAssist:!0},this.cosmetics=[{id:"basic_collar",name:"Basic Collar",type:"collar",unlocked:!0,equipped:!0},{id:"golden_collar",name:"Golden Collar",type:"collar",unlocked:!1,equipped:!1},{id:"sparkle_trail",name:"Sparkle Trail",type:"trail",unlocked:!1,equipped:!1},{id:"beat_wings",name:"Beat Wings",type:"hat",unlocked:!1,equipped:!1},{id:"happy_bark",name:"Happy Bark",type:"emote",unlocked:!1,equipped:!1}],this.toasts=[],this.overlay=document.getElementById("uiOverlay"),this.setupEventListeners(),this.loadSettings()}initialize(e,t){this._canvas=e,this.gameInstance=t,this.createMainMenu()}setupEventListeners(){window.addEventListener("resize",()=>{this.handleResize()}),document.addEventListener("keydown",e=>{this.handleKeyboardShortcuts(e)}),"share"in navigator&&this.setupWebShare()}handleResize(){const e=window.innerWidth<768;this.overlay.classList.toggle("mobile-layout",e),this.settings.leftHandMode&&this.overlay.classList.add("left-hand-mode")}handleKeyboardShortcuts(e){if(e.code==="Escape"&&this.currentMenu!=="main"&&this.showMenu(),e.code==="KeyS"&&e.ctrlKey&&(e.preventDefault(),this.showSettings()),e.code==="KeyL"&&e.ctrlKey&&(e.preventDefault(),this.showLeaderboard()),(e.code==="ArrowDown"||e.code==="ArrowUp")&&this.handleArrowKeyNavigation(e.code==="ArrowDown"?1:-1),e.code==="Enter"||e.code==="Space"){const t=document.activeElement;t&&t.tagName==="BUTTON"&&t.click()}}handleArrowKeyNavigation(e){const t=this.overlay.querySelectorAll('button:not(:disabled), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');if(t.length===0)return;let a=Array.from(t).indexOf(document.activeElement)+e;a<0&&(a=t.length-1),a>=t.length&&(a=0),t[a].focus()}showMenu(){this.currentMenu="main",this.overlay.innerHTML=this.createMainMenuHTML(),this.bindMainMenuEvents(),this.overlay.classList.remove("hidden")}createMainMenu(){this.showMenu()}createMainMenuHTML(){const e=this.settings.leftHandMode?"left-hand-mode":"",t=this.settings.highContrast?"high-contrast":"",s=this.settings.colorblind?"colorblind-safe":"";return`
             <div class="menu-container ${e} ${t} ${s}">
                 <div class="main-menu">
                     <!-- Game Logo -->
@@ -8,19 +8,24 @@ class v{constructor(){this._canvas=null,this.gameInstance=null,this.currentMenu=
                     </div>
                     
                     <!-- Main Buttons -->
-                    <div class="button-group">
-                        <button id="start-classic" class="menu-btn primary-btn animate-float">
-                            <span class="btn-icon">🎮</span>
+                    <div class="button-group" role="group" aria-label="Game Mode Selection">
+                        <button id="start-classic" class="menu-btn primary-btn animate-float" 
+                                aria-label="Start Classic Mode - Traditional Flappy gameplay">
+                            <span class="btn-icon" aria-hidden="true">🎮</span>
                             <span class="btn-text">Classic Mode</span>
                         </button>
                         
-                        <button id="start-rhythm" class="menu-btn secondary-btn animate-float" style="animation-delay: 0.1s">
-                            <span class="btn-icon">🎵</span>
+                        <button id="start-rhythm" class="menu-btn secondary-btn animate-float" 
+                                style="animation-delay: 0.1s"
+                                aria-label="Start Rhythm Mode - Obstacles sync to music beats">
+                            <span class="btn-icon" aria-hidden="true">🎵</span>
                             <span class="btn-text">Rhythm Mode</span>
                         </button>
                         
-                        <button id="start-checkpoint" class="menu-btn secondary-btn animate-float" style="animation-delay: 0.2s">
-                            <span class="btn-icon">🏁</span>
+                        <button id="start-checkpoint" class="menu-btn secondary-btn animate-float" 
+                                style="animation-delay: 0.2s"
+                                aria-label="Start Checkpoint Mode - Save progress every 30 points">
+                            <span class="btn-icon" aria-hidden="true">🏁</span>
                             <span class="btn-text">Checkpoint Mode</span>
                         </button>
                     </div>
