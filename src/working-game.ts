@@ -43,17 +43,22 @@ export class WorkingFlappyDog {
     private readonly OBSTACLE_SPEED = 3;
 
     constructor() {
-        // Create canvas exactly like reference
+        // Create retro pixel canvas
         this.canvas = document.createElement('canvas');
         this.canvas.width = this.CANVAS_WIDTH;
         this.canvas.height = this.CANVAS_HEIGHT;
-        this.canvas.style.border = '3px solid #2c3e50';
-        this.canvas.style.borderRadius = '8px';
+        this.canvas.style.border = '4px solid #2c3e50';
+        this.canvas.style.borderRadius = '0px'; // No rounded corners for pixel style
         this.canvas.style.display = 'block';
-        this.canvas.style.margin = '20px auto';
+        this.canvas.style.margin = '0 auto';
         this.canvas.style.cursor = 'pointer';
-        this.canvas.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+        this.canvas.style.boxShadow = `
+            inset 2px 2px 0px #ffffff,
+            inset -2px -2px 0px #adb5bd,
+            4px 4px 0px #2c3e50
+        `;
         this.canvas.style.imageRendering = 'pixelated';
+        this.canvas.style.background = 'linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 100%)';
         
         this.ctx = this.canvas.getContext('2d')!;
         
@@ -86,75 +91,122 @@ export class WorkingFlappyDog {
                 padding: 20px;
                 box-sizing: border-box;
             ">
-                <!-- Game Header -->
+                <!-- Retro Pixel Game Header -->
                 <div style="
-                    border: 2px solid #2c3e50;
-                    border-radius: 8px 8px 0 0;
+                    border: 4px solid #2c3e50;
+                    border-style: solid;
+                    border-image: none;
                     padding: 15px;
-                    background: white;
+                    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
                     width: 800px;
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    box-shadow: 
+                        inset 2px 2px 0px #ffffff,
+                        inset -2px -2px 0px #adb5bd,
+                        4px 4px 0px #2c3e50;
+                    image-rendering: pixelated;
+                    font-family: 'Courier New', monospace;
                 ">
-                    <h3 style="margin: 0; font-size: 18px; color: #2c3e50; font-weight: bold;">FlappyDog</h3>
-                    <div style="display: flex; gap: 10px;">
+                    <h3 style="
+                        margin: 0; 
+                        font-size: 20px; 
+                        color: #2c3e50; 
+                        font-weight: bold;
+                        font-family: 'Courier New', monospace;
+                        text-shadow: 
+                            1px 1px 0px #ffffff,
+                            2px 2px 0px #adb5bd;
+                        letter-spacing: 2px;
+                    ">FLAPPY DOG</h3>
+                    <div style="display: flex; gap: 8px;">
                         <button id="soundBtn" style="
-                            padding: 8px 16px;
-                            background: #27ae60;
+                            padding: 10px 14px;
+                            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
                             color: white;
-                            border: none;
-                            border-radius: 4px;
+                            border: 3px solid #1e8449;
+                            border-style: solid;
                             cursor: pointer;
-                            font-size: 14px;
+                            font-size: 12px;
                             font-weight: bold;
-                        ">🔊 Sound</button>
+                            font-family: 'Courier New', monospace;
+                            text-shadow: 1px 1px 0px #1e8449;
+                            box-shadow: 
+                                inset 1px 1px 0px rgba(255,255,255,0.3),
+                                inset -1px -1px 0px rgba(0,0,0,0.3),
+                                2px 2px 0px #1e8449;
+                            image-rendering: pixelated;
+                            letter-spacing: 1px;
+                        ">🔊 SOUND</button>
                         <button id="resetBtn" style="
-                            padding: 8px 16px;
-                            background: #e74c3c;
+                            padding: 10px 14px;
+                            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
                             color: white;
-                            border: none;
-                            border-radius: 4px;
+                            border: 3px solid #a93226;
+                            border-style: solid;
                             cursor: pointer;
-                            font-size: 14px;
+                            font-size: 12px;
                             font-weight: bold;
-                        ">Reset</button>
+                            font-family: 'Courier New', monospace;
+                            text-shadow: 1px 1px 0px #a93226;
+                            box-shadow: 
+                                inset 1px 1px 0px rgba(255,255,255,0.3),
+                                inset -1px -1px 0px rgba(0,0,0,0.3),
+                                2px 2px 0px #a93226;
+                            image-rendering: pixelated;
+                            letter-spacing: 1px;
+                        ">RESET</button>
                     </div>
                 </div>
                 
-                <!-- Game Canvas Container -->
+                <!-- Retro Pixel Game Canvas Container -->
                 <div id="game-container" style="
-                    border: 2px solid #2c3e50;
+                    border: 4px solid #2c3e50;
                     border-top: none;
                     border-bottom: none;
-                    background: white;
-                    padding: 10px;
+                    background: linear-gradient(45deg, #f8f9fa 0%, #e9ecef 100%);
+                    padding: 12px;
                     display: flex;
                     justify-content: center;
                     align-items: center;
-                    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+                    box-shadow: 
+                        inset 2px 2px 0px #ffffff,
+                        inset -2px -2px 0px #adb5bd;
+                    image-rendering: pixelated;
                 "></div>
                 
-                <!-- Instructions -->
+                <!-- Retro Pixel Instructions Footer -->
                 <div style="
-                    border: 2px solid #2c3e50;
-                    border-radius: 0 0 8px 8px;
+                    border: 4px solid #2c3e50;
                     padding: 15px;
-                    background: white;
+                    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
                     width: 800px;
                     text-align: center;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    box-shadow: 
+                        inset 2px 2px 0px #ffffff,
+                        inset -2px -2px 0px #adb5bd,
+                        4px 4px 0px #2c3e50;
+                    image-rendering: pixelated;
+                    font-family: 'Courier New', monospace;
                 ">
                     <div id="instructions" style="
                         font-size: 14px;
-                        color: #666;
+                        color: #2c3e50;
                         margin-bottom: 8px;
-                    ">Click canvas or press Space to start flying!</div>
+                        font-weight: bold;
+                        font-family: 'Courier New', monospace;
+                        text-shadow: 1px 1px 0px #ffffff;
+                        letter-spacing: 1px;
+                    ">CLICK CANVAS OR PRESS SPACE TO START FLYING!</div>
                     <div id="scoreDisplay" style="
                         font-size: 12px;
-                        color: #999;
-                    ">Current: ${this.score} • Best: ${this.highScore} • Navigate through the obstacles!</div>
+                        color: #495057;
+                        font-family: 'Courier New', monospace;
+                        font-weight: bold;
+                        text-shadow: 1px 1px 0px #ffffff;
+                        letter-spacing: 1px;
+                    ">CURRENT: ${this.score} • BEST: ${this.highScore} • NAVIGATE THROUGH THE OBSTACLES!</div>
                 </div>
             </div>
         `;
@@ -298,8 +350,18 @@ export class WorkingFlappyDog {
         this.soundEnabled = !this.soundEnabled;
         const soundBtn = document.getElementById('soundBtn');
         if (soundBtn) {
-            soundBtn.textContent = this.soundEnabled ? '🔊 Sound' : '🔇 Muted';
-            soundBtn.style.background = this.soundEnabled ? '#27ae60' : '#7f8c8d';
+            soundBtn.textContent = this.soundEnabled ? '🔊 SOUND' : '🔇 MUTED';
+            soundBtn.style.background = this.soundEnabled ? 
+                'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)' : 
+                'linear-gradient(135deg, #7f8c8d 0%, #95a5a6 100%)';
+            soundBtn.style.borderColor = this.soundEnabled ? '#1e8449' : '#5d6d7e';
+            soundBtn.style.boxShadow = this.soundEnabled ? 
+                `inset 1px 1px 0px rgba(255,255,255,0.3),
+                 inset -1px -1px 0px rgba(0,0,0,0.3),
+                 2px 2px 0px #1e8449` :
+                `inset 1px 1px 0px rgba(255,255,255,0.3),
+                 inset -1px -1px 0px rgba(0,0,0,0.3),
+                 2px 2px 0px #5d6d7e`;
         }
         console.log('Sound', this.soundEnabled ? 'enabled' : 'disabled');
     }
@@ -447,21 +509,89 @@ export class WorkingFlappyDog {
     }
 
     private drawBackground(): void {
-        // Sky gradient (like reference)
+        // Beautiful layered sky gradient
         const gradient = this.ctx.createLinearGradient(0, 0, 0, this.CANVAS_HEIGHT);
         gradient.addColorStop(0, '#87CEEB');
+        gradient.addColorStop(0.3, '#98D8E8');
+        gradient.addColorStop(0.7, '#B0E0E6');
         gradient.addColorStop(1, '#E0F6FF');
         this.ctx.fillStyle = gradient;
         this.ctx.fillRect(0, 0, this.CANVAS_WIDTH, this.CANVAS_HEIGHT);
         
-        // Simple clouds (like reference)
-        this.ctx.fillStyle = '#ffffff';
-        for (let i = 0; i < 5; i++) {
-            const x = (i * 150) + 50;
-            const y = 30 + (i * 30) % 80;
-            this.ctx.fillRect(x, y, 60, 30);
-            this.ctx.fillRect(x + 15, y - 15, 30, 30);
-            this.ctx.fillRect(x + 30, y - 20, 20, 35);
+        // Animated pixel clouds (multiple layers for depth)
+        const time = Date.now() * 0.0005;
+        
+        // Back layer clouds (slower, lighter)
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        for (let i = 0; i < 4; i++) {
+            const x = ((i * 200) + (time * 10) % (this.CANVAS_WIDTH + 100)) - 100;
+            const y = 40 + (i * 25);
+            this.drawPixelCloud(x, y, 80, 40);
+        }
+        
+        // Middle layer clouds (medium speed)
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+        for (let i = 0; i < 3; i++) {
+            const x = ((i * 250) + (time * 20) % (this.CANVAS_WIDTH + 120)) - 120;
+            const y = 80 + (i * 40);
+            this.drawPixelCloud(x, y, 100, 50);
+        }
+        
+        // Front layer clouds (faster, more opaque)
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        for (let i = 0; i < 3; i++) {
+            const x = ((i * 180) + (time * 35) % (this.CANVAS_WIDTH + 80)) - 80;
+            const y = 120 + (i * 35);
+            this.drawPixelCloud(x, y, 70, 35);
+        }
+        
+        // Add pixel stars in the background
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        for (let i = 0; i < 15; i++) {
+            const x = (i * 53 + time * 5) % this.CANVAS_WIDTH;
+            const y = (i * 37) % (this.CANVAS_HEIGHT * 0.6);
+            this.ctx.fillRect(x, y, 2, 2);
+        }
+        
+        // Add distant pixel mountains/hills at the bottom
+        this.ctx.fillStyle = 'rgba(34, 139, 34, 0.3)';
+        for (let i = 0; i < this.CANVAS_WIDTH; i += 20) {
+            const height = 40 + Math.sin(i * 0.02) * 20;
+            this.ctx.fillRect(i, this.CANVAS_HEIGHT - height, 20, height);
+        }
+        
+        // Add pixel grass texture at bottom
+        this.ctx.fillStyle = 'rgba(34, 139, 34, 0.5)';
+        for (let i = 0; i < this.CANVAS_WIDTH; i += 4) {
+            if (Math.random() > 0.7) {
+                this.ctx.fillRect(i, this.CANVAS_HEIGHT - 8, 2, 8);
+            }
+        }
+    }
+    
+    private drawPixelCloud(x: number, y: number, width: number, height: number): void {
+        // Draw pixelated cloud with blocky style
+        const blockSize = 8;
+        const blocksW = Math.floor(width / blockSize);
+        const blocksH = Math.floor(height / blockSize);
+        
+        for (let bx = 0; bx < blocksW; bx++) {
+            for (let by = 0; by < blocksH; by++) {
+                // Create cloud shape with some randomness
+                const centerX = blocksW / 2;
+                const centerY = blocksH / 2;
+                const distance = Math.sqrt((bx - centerX) ** 2 + (by - centerY) ** 2);
+                const maxDistance = Math.min(centerX, centerY);
+                
+                if (distance < maxDistance * 0.8 || (distance < maxDistance && Math.random() > 0.3)) {
+                    this.ctx.fillRect(
+                        x + bx * blockSize, 
+                        y + by * blockSize, 
+                        blockSize - 1, 
+                        blockSize - 1
+                    );
+                }
+            }
         }
     }
 
