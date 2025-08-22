@@ -4,11 +4,11 @@
  */
 
 import './styles.css';
-import { SimpleFlappyDog } from './simple-game';
+import { WorkingFlappyDog } from './working-game';
 
-// Simple initialization
+// Working initialization (based on reference)
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Initializing Simple FlappyDog...');
+    console.log('Initializing Working FlappyDog...');
     
     // Hide loading screen
     const loading = document.getElementById('loading');
@@ -16,10 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
         loading.style.display = 'none';
     }
     
-    // Create the game
-    new SimpleFlappyDog();
+    // Create the working game (no assets needed)
+    new WorkingFlappyDog();
     
-    console.log('Simple FlappyDog initialized successfully!');
+    console.log('Working FlappyDog initialized successfully!');
 });
 
 // Service worker registration (optional)
