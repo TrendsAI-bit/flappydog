@@ -470,11 +470,6 @@ class GameEngine {
         } else {
             this.audioManager.playMusic('ambient');
         }
-        
-        // Hide loading screen and show canvas
-        document.getElementById('loading')?.classList.add('hidden');
-        this.canvas.classList.remove('hidden');
-        document.getElementById('uiOverlay')?.classList.remove('hidden');
     }
     
     private pauseGame(): void {
@@ -1574,6 +1569,11 @@ class GameEngine {
         // Audio manager initializes itself in constructor
         this.uiManager.initialize(this.canvas);
         this.leaderboardManager.initialize();
+        
+        // Hide loading screen and show game
+        document.getElementById('loading')?.classList.add('hidden');
+        this.canvas.classList.remove('hidden');
+        document.getElementById('uiOverlay')?.classList.remove('hidden');
         
         // Show main menu
         this.uiManager.showMenu();

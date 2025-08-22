@@ -37,7 +37,6 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          audio: ['./src/audio.ts'],
           ui: ['./src/ui.ts']
         }
       }
