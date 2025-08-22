@@ -34,7 +34,7 @@ export interface Cosmetic {
 
 export class UIManager {
     private overlay: HTMLElement;
-    private canvas: HTMLCanvasElement | null = null;
+    private _canvas: HTMLCanvasElement | null = null;
     private gameInstance: any = null;
     private currentMenu: string = 'main';
     
@@ -74,7 +74,7 @@ export class UIManager {
     }
     
     public initialize(canvas: HTMLCanvasElement, gameInstance?: any): void {
-        this.canvas = canvas;
+        this._canvas = canvas;
         this.gameInstance = gameInstance;
         this.createMainMenu();
     }
@@ -1011,7 +1011,7 @@ export class UIManager {
     
     private claimQuestReward(button: HTMLElement): void {
         button.textContent = 'Claimed!';
-        button.disabled = true;
+        (button as HTMLButtonElement).disabled = true;
         this.showToast('Quest reward claimed!', 'success');
     }
     
@@ -1159,7 +1159,7 @@ export class UIManager {
         return { ...this.settings };
     }
     
-    public updateQuest(questId: string, progress: number): void {
+    public updateQuest(_questId: string, _progress: number): void {
         // Update quest progress and show toast if completed
     }
     

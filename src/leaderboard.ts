@@ -105,7 +105,7 @@ export class LeaderboardManager {
     
     private getApiEndpoint(): string {
         // Use different endpoints for development and production
-        if (import.meta.env.DEV) {
+        if (process.env.NODE_ENV === 'development') {
             return 'http://localhost:3000/api';
         } else {
             return '/api'; // Vercel serverless functions

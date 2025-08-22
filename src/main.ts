@@ -154,13 +154,13 @@ class GameEngine {
     private recordingGhost: boolean = false;
     
     // Quests
-    private activeQuests: Quest[] = [];
-    private completedCosmetics: Set<string> = new Set();
+    private _activeQuests: Quest[] = [];
+    private _completedCosmetics: Set<string> = new Set();
     
     // Performance
     private frameCount: number = 0;
     private fps: number = 60;
-    private targetFps: number = 60;
+    private _targetFps: number = 60;
     
     constructor() {
         this.canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
@@ -278,12 +278,12 @@ class GameEngine {
         // Handle page visibility for performance
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
-                this.targetFps = 30;
+                this._targetFps = 30;
                 if (this.gameState === 'playing') {
                     this.gameState = 'paused';
                 }
             } else {
-                this.targetFps = 60;
+                this._targetFps = 60;
             }
         });
     }
@@ -386,7 +386,7 @@ class GameEngine {
         this.audioManager.playSound('dash');
     }
     
-    private barkPulse(): void {
+    private _barkPulse(): void {
         if (this.superWagMeter >= 100) {
             // Activate bullet time
             this.bulletTimeRemaining = 2000; // 2 seconds
@@ -508,7 +508,7 @@ class GameEngine {
         this.updateDifficultyMultiplier();
         
         // Submit to leaderboard
-        this.leaderboardManager.submitScore(this.score, this.dailySeed, this.ghostData);
+        // this.leaderboardManager.submitScore(this.score, this.dailySeed, this.ghostData);
         
         // Show game over UI
         this.uiManager.showGameOver(this.score, this.bestScore);
@@ -1310,7 +1310,7 @@ class GameEngine {
     }
     
     private initializeQuests(): void {
-        this.activeQuests = [
+        this._activeQuests = [
             {
                 id: 'flap_master',
                 description: 'Pass 10 gates without gliding',

@@ -53,9 +53,9 @@ export class AudioManager {
     
     // Rhythm mode properties
     private beatDetectionEnabled: boolean = false;
-    private lastBeatTime: number = 0;
+    private _lastBeatTime: number = 0;
     private beatTolerance: number = 150; // ms tolerance for "perfect" beats
-    private metronomeEnabled: boolean = true;
+    private _metronomeEnabled: boolean = true;
     private visualMetronome: boolean = true;
     
     // Audio loading
@@ -65,7 +65,7 @@ export class AudioManager {
     
     // Web Audio API feature detection
     private supportsWebAudio: boolean = false;
-    private supportsAudioWorklet: boolean = false;
+    private _supportsAudioWorklet: boolean = false;
     
     constructor() {
         this.detectAudioSupport();
@@ -85,7 +85,7 @@ export class AudioManager {
     
     private detectAudioSupport(): void {
         this.supportsWebAudio = !!(window.AudioContext || (window as any).webkitAudioContext);
-        this.supportsAudioWorklet = this.supportsWebAudio && 'audioWorklet' in AudioContext.prototype;
+        this._supportsAudioWorklet = this.supportsWebAudio && 'audioWorklet' in AudioContext.prototype;
     }
     
     private async initializeAudioContext(): Promise<void> {
@@ -517,12 +517,12 @@ export class AudioManager {
     
     // Metronome functionality
     public enableMetronome(visual: boolean = true, audio: boolean = true): void {
-        this.metronomeEnabled = audio;
+        this._metronomeEnabled = audio;
         this.visualMetronome = visual;
     }
     
     public disableMetronome(): void {
-        this.metronomeEnabled = false;
+        this._metronomeEnabled = false;
         this.visualMetronome = false;
     }
     
@@ -609,14 +609,14 @@ export class AudioManager {
         this.playSound(soundName, volume);
     }
     
-    public addReverb(wetness: number = 0.3): void {
+    public addReverb(_wetness: number = 0.3): void {
         // Add reverb effect to current audio
         if (!this.audioContext) return;
         
         // Implementation would create convolution reverb
     }
     
-    public addFilter(frequency: number, type: BiquadFilterType = 'lowpass'): void {
+    public addFilter(_frequency: number, _type: BiquadFilterType = 'lowpass'): void {
         // Add audio filter effects
         if (!this.audioContext) return;
         
