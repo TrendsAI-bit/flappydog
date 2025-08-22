@@ -27,11 +27,15 @@ export class WorkingFlappyDog {
     // Pixel dog sprite
     private pixelDogImage: HTMLImageElement | null = null;
     private dogImageLoaded: boolean = false;
+    
+    // Sound effects
+    private sounds: { [key: string]: HTMLAudioElement } = {};
+    private soundEnabled: boolean = true;
 
     // Game constants (exactly like reference)
     private readonly CANVAS_WIDTH = 800;
     private readonly CANVAS_HEIGHT = 600;
-    private readonly DOG_SIZE = 30;
+    private readonly DOG_SIZE = 50; // Made bigger!
     private readonly OBSTACLE_WIDTH = 60;
     private readonly GAP_SIZE = 150;
     private readonly GRAVITY = 0.6;
@@ -95,16 +99,28 @@ export class WorkingFlappyDog {
                     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
                 ">
                     <h3 style="margin: 0; font-size: 18px; color: #2c3e50; font-weight: bold;">FlappyDog</h3>
-                    <button id="resetBtn" style="
-                        padding: 8px 16px;
-                        background: #e74c3c;
-                        color: white;
-                        border: none;
-                        border-radius: 4px;
-                        cursor: pointer;
-                        font-size: 14px;
-                        font-weight: bold;
-                    ">Reset</button>
+                    <div style="display: flex; gap: 10px;">
+                        <button id="soundBtn" style="
+                            padding: 8px 16px;
+                            background: #27ae60;
+                            color: white;
+                            border: none;
+                            border-radius: 4px;
+                            cursor: pointer;
+                            font-size: 14px;
+                            font-weight: bold;
+                        ">🔊 Sound</button>
+                        <button id="resetBtn" style="
+                            padding: 8px 16px;
+                            background: #e74c3c;
+                            color: white;
+                            border: none;
+                            border-radius: 4px;
+                            cursor: pointer;
+                            font-size: 14px;
+                            font-weight: bold;
+                        ">Reset</button>
+                    </div>
                 </div>
                 
                 <!-- Game Canvas Container -->
@@ -150,8 +166,16 @@ export class WorkingFlappyDog {
             this.resetGame();
         });
         
+        // Sound toggle button handler
+        document.getElementById('soundBtn')!.addEventListener('click', () => {
+            this.toggleSound();
+        });
+        
         // Load the pixel dog sprite
         this.loadPixelDog();
+        
+        // Initialize sounds
+        this.initializeSounds();
         
         // Start game loop immediately
         this.gameLoop();
@@ -170,6 +194,104 @@ export class WorkingFlappyDog {
             this.dogImageLoaded = false;
         };
         this.pixelDogImage.src = '/pixeldog.png';
+    }
+
+    private initializeSounds(): void {
+        // Create simple audio context for generating sounds
+        try {
+            const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+            
+            // Generate simple sound effects
+            this.generateSound('flap', audioContext, 200, 0.1, 'sine');
+            this.generateSound('score', audioContext, 400, 0.2, 'sine');
+            this.generateSound('gameover', audioContext, 150, 0.5, 'sawtooth');
+            
+            console.log('Sounds initialized successfully!');
+        } catch (error) {
+            console.warn('Audio not supported:', error);
+            this.soundEnabled = false;
+        }
+    }
+
+    private generateSound(name: string, audioContext: AudioContext, frequency: number, duration: number, type: OscillatorType): void {
+        // Create a data URL for the generated sound
+        const sampleRate = audioContext.sampleRate;
+        const numSamples = sampleRate * duration;
+        const buffer = audioContext.createBuffer(1, numSamples, sampleRate);
+        const channelData = buffer.getChannelData(0);
+
+        for (let i = 0; i < numSamples; i++) {
+            const t = i / sampleRate;
+            let sample = 0;
+            
+            if (type === 'sine') {
+                sample = Math.sin(2 * Math.PI * frequency * t);
+            } else if (type === 'sawtooth') {
+                sample = 2 * (t * frequency - Math.floor(t * frequency + 0.5));
+            }
+            
+            // Apply envelope
+            const envelope = Math.exp(-t * 3);
+            channelData[i] = sample * envelope * 0.3;
+        }
+
+        // Convert to audio element (simplified approach)
+        const audio = new Audio();
+        audio.volume = 0.3;
+        this.sounds[name] = audio;
+    }
+
+    private playSound(soundName: string): void {
+        if (!this.soundEnabled) return;
+        
+        try {
+            // Simple beep sounds using Web Audio API
+            const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // Different frequencies for different sounds
+            switch(soundName) {
+                case 'flap':
+                    oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
+                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.1);
+                    break;
+                case 'score':
+                    oscillator.frequency.setValueAtTime(500, audioContext.currentTime);
+                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                    break;
+                case 'gameover':
+                    oscillator.frequency.setValueAtTime(150, audioContext.currentTime);
+                    oscillator.type = 'sawtooth';
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.8);
+                    break;
+            }
+        } catch (error) {
+            // Fallback: no sound
+            console.warn('Could not play sound:', error);
+        }
+    }
+
+    private toggleSound(): void {
+        this.soundEnabled = !this.soundEnabled;
+        const soundBtn = document.getElementById('soundBtn');
+        if (soundBtn) {
+            soundBtn.textContent = this.soundEnabled ? '🔊 Sound' : '🔇 Muted';
+            soundBtn.style.background = this.soundEnabled ? '#27ae60' : '#7f8c8d';
+        }
+        console.log('Sound', this.soundEnabled ? 'enabled' : 'disabled');
     }
 
     private handleInput(): void {
@@ -194,6 +316,7 @@ export class WorkingFlappyDog {
 
     private jump(): void {
         this.dog.velocity = this.JUMP_STRENGTH;
+        this.playSound('flap');
     }
 
     private resetGame(): void {
@@ -241,6 +364,7 @@ export class WorkingFlappyDog {
                 obstacle.passed = true;
                 this.score++;
                 this.updateScoreDisplay();
+                this.playSound('score');
                 console.log('Score:', this.score);
             }
         });
@@ -283,6 +407,7 @@ export class WorkingFlappyDog {
 
     private gameOver(): void {
         this.gameState = 'gameOver';
+        this.playSound('gameover');
         
         // Update high score
         if (this.score > this.highScore) {
@@ -388,9 +513,9 @@ export class WorkingFlappyDog {
 
     private drawDog(x: number, y: number): void {
         if (this.dogImageLoaded && this.pixelDogImage) {
-            // Use the actual pixel dog sprite
-            const dogWidth = this.DOG_SIZE + 10;
-            const dogHeight = this.DOG_SIZE + 10;
+            // Use the actual pixel dog sprite - made much bigger!
+            const dogWidth = this.DOG_SIZE + 20;
+            const dogHeight = this.DOG_SIZE + 20;
             
             // Add subtle rotation based on velocity for playing state
             if (this.gameState === 'playing') {
