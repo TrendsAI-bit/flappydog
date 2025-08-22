@@ -127,22 +127,38 @@ export class SimpleFlappyDog {
         // Load dog image
         this.dogImage = new Image();
         this.dogImage.onload = onAssetLoad;
-        this.dogImage.src = '/assets/dog.png';
+        this.dogImage.onerror = () => {
+            console.warn('Dog image failed to load');
+            onAssetLoad();
+        };
+        this.dogImage.src = '/dog.png';
 
         // Load logo image
         this.logoImage = new Image();
         this.logoImage.onload = onAssetLoad;
-        this.logoImage.src = '/asset/logo.png';
+        this.logoImage.onerror = () => {
+            console.warn('Logo image failed to load');
+            onAssetLoad();
+        };
+        this.logoImage.src = '/logo.png';
 
         // Load obstacles image
         this.obstaclesImage = new Image();
         this.obstaclesImage.onload = onAssetLoad;
-        this.obstaclesImage.src = '/assets/obstacles.png';
+        this.obstaclesImage.onerror = () => {
+            console.warn('Obstacles image failed to load');
+            onAssetLoad();
+        };
+        this.obstaclesImage.src = '/obstacles.png';
 
         // Load clouds image
         this.cloudsImage = new Image();
         this.cloudsImage.onload = onAssetLoad;
-        this.cloudsImage.src = '/assets/clouds.png';
+        this.cloudsImage.onerror = () => {
+            console.warn('Clouds image failed to load');
+            onAssetLoad();
+        };
+        this.cloudsImage.src = '/clouds.png';
 
         // Fallback timeout
         setTimeout(() => {
@@ -482,53 +498,58 @@ export class SimpleFlappyDog {
     }
 
     private drawObstacle(obstacle: Obstacle): void {
-        if (this.obstaclesImage) {
-            // Use the actual obstacles sprite
-            // Top obstacle (flipped)
-            this.ctx.save();
-            this.ctx.translate(obstacle.x + this.OBSTACLE_WIDTH/2, obstacle.gapY);
-            this.ctx.scale(1, -1);
-            this.ctx.drawImage(this.obstaclesImage, -this.OBSTACLE_WIDTH/2, 0, this.OBSTACLE_WIDTH, obstacle.gapY);
-            this.ctx.restore();
-            
-            // Bottom obstacle
-            this.ctx.drawImage(
-                this.obstaclesImage, 
-                obstacle.x, 
-                obstacle.gapY + this.GAP_SIZE, 
-                this.OBSTACLE_WIDTH, 
-                this.CANVAS_HEIGHT - obstacle.gapY - this.GAP_SIZE
-            );
-        } else {
-            // Fallback rectangular obstacles
-            this.ctx.fillStyle = '#34495e';
-            
-            // Top obstacle
-            this.ctx.fillRect(obstacle.x, 0, this.OBSTACLE_WIDTH, obstacle.gapY);
-            
-            // Bottom obstacle
-            this.ctx.fillRect(
-                obstacle.x, 
-                obstacle.gapY + this.GAP_SIZE, 
-                this.OBSTACLE_WIDTH, 
-                this.CANVAS_HEIGHT - obstacle.gapY - this.GAP_SIZE
-            );
-            
-            // Obstacle caps with better styling
-            this.ctx.fillStyle = '#2c3e50';
-            this.ctx.fillRect(obstacle.x - 5, obstacle.gapY - 25, this.OBSTACLE_WIDTH + 10, 25);
-            this.ctx.fillRect(obstacle.x - 5, obstacle.gapY + this.GAP_SIZE, this.OBSTACLE_WIDTH + 10, 25);
-            
-            // Add some detail lines
-            this.ctx.strokeStyle = '#1a252f';
-            this.ctx.lineWidth = 2;
-            this.ctx.beginPath();
-            this.ctx.moveTo(obstacle.x + 5, 0);
-            this.ctx.lineTo(obstacle.x + 5, obstacle.gapY);
-            this.ctx.moveTo(obstacle.x + this.OBSTACLE_WIDTH - 5, 0);
-            this.ctx.lineTo(obstacle.x + this.OBSTACLE_WIDTH - 5, obstacle.gapY);
-            this.ctx.stroke();
+        if (this.obstaclesImage && this.obstaclesImage.complete) {
+            try {
+                // Use the actual obstacles sprite
+                // Top obstacle (flipped)
+                this.ctx.save();
+                this.ctx.translate(obstacle.x + this.OBSTACLE_WIDTH/2, obstacle.gapY);
+                this.ctx.scale(1, -1);
+                this.ctx.drawImage(this.obstaclesImage, -this.OBSTACLE_WIDTH/2, 0, this.OBSTACLE_WIDTH, obstacle.gapY);
+                this.ctx.restore();
+                
+                // Bottom obstacle
+                this.ctx.drawImage(
+                    this.obstaclesImage, 
+                    obstacle.x, 
+                    obstacle.gapY + this.GAP_SIZE, 
+                    this.OBSTACLE_WIDTH, 
+                    this.CANVAS_HEIGHT - obstacle.gapY - this.GAP_SIZE
+                );
+                return;
+            } catch (error) {
+                console.warn('Error drawing obstacle image:', error);
+            }
         }
+        
+        // Fallback rectangular obstacles
+        this.ctx.fillStyle = '#34495e';
+        
+        // Top obstacle
+        this.ctx.fillRect(obstacle.x, 0, this.OBSTACLE_WIDTH, obstacle.gapY);
+        
+        // Bottom obstacle
+        this.ctx.fillRect(
+            obstacle.x, 
+            obstacle.gapY + this.GAP_SIZE, 
+            this.OBSTACLE_WIDTH, 
+            this.CANVAS_HEIGHT - obstacle.gapY - this.GAP_SIZE
+        );
+        
+        // Obstacle caps with better styling
+        this.ctx.fillStyle = '#2c3e50';
+        this.ctx.fillRect(obstacle.x - 5, obstacle.gapY - 25, this.OBSTACLE_WIDTH + 10, 25);
+        this.ctx.fillRect(obstacle.x - 5, obstacle.gapY + this.GAP_SIZE, this.OBSTACLE_WIDTH + 10, 25);
+        
+        // Add some detail lines
+        this.ctx.strokeStyle = '#1a252f';
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        this.ctx.moveTo(obstacle.x + 5, 0);
+        this.ctx.lineTo(obstacle.x + 5, obstacle.gapY);
+        this.ctx.moveTo(obstacle.x + this.OBSTACLE_WIDTH - 5, 0);
+        this.ctx.lineTo(obstacle.x + this.OBSTACLE_WIDTH - 5, obstacle.gapY);
+        this.ctx.stroke();
     }
 
     private gameLoop = (): void => {
